@@ -5,11 +5,28 @@ import (
 	"fmt"
 	"net/http"
 	"plan-poker/game"
+	"strconv"
 )
 
-func main() {
-	var games []*game.Game
+var games []*game.Game
 
+func findGame(id int) *game.Game {
+	for _, g := range games {
+		if g.ID == id {
+			return g
+		}
+	}
+	return nil
+}
+
+func gameHandler(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.ParseInt(r.URL.Path[len("/games/"):], 10, 32)
+	g := findGame(int(id))
+	s, _ := json.Marshal(g)
+	fmt.Fprintf(w, string(s))
+}
+
+func main() {
 	games = append(games, game.NewGame("whisqy"))
 	games = append(games, game.NewGame("SD"))
 
@@ -21,6 +38,7 @@ func main() {
 		s, _ := json.Marshal(games)
 		fmt.Fprintf(w, string(s))
 	})
+	mux.HandleFunc("/games/", gameHandler)
 	http.ListenAndServe(":4000", mux)
 
 }
