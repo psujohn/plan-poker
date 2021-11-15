@@ -2,6 +2,7 @@ package game
 
 import (
   "encoding/json"
+  "errors"
   "fmt"
   "net/http"
   "strconv"
@@ -20,13 +21,13 @@ func (g *Games) AddGame(name string) {
   g.games = append(g.games, NewGame(name))
 }
 
-func (g Games) findGame(id int) *Game{
+func (g Games) findGame(id int) (*Game, error){
   for _, gm := range g.games {
     if gm.ID == id {
-      return &gm
+      return &gm, nil
     }
   }
-  return nil
+  return nil, errors.New("Couldn't find game")
 }
 
 func (g Games) Index(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,11 @@ func (g Games) Show(w http.ResponseWriter, r *http.Request) {
     fmt.Println("Couldn't parse game ID in show")
   }
 
-  game := g.findGame(int(id))
+  game, err := g.findGame(int(id))
+  if err != nil {
+    fmt.Println(err.Error())
+  }
+
   payload, err := json.Marshal(game)
   if err != nil {
     fmt.Println("Error marhaling game data")
