@@ -17,3 +17,16 @@ func TestFindGame(t *testing.T) {
     t.Errorf("Failed to retrieve correct game")
   }
 }
+
+func TestAddGame(t *testing.T) {
+  games := NewGames()
+  games.AddGame("test")
+
+  if len(games.games) != 1 {
+    t.Errorf("Failed to add game")
+  }
+
+  if game := games.games[0]; game.Name != "test" {
+    t.Errorf("Failed to AddGame with correct data")
+  }
+}
