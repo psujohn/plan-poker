@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -42,9 +43,9 @@ func TestAddGame(t *testing.T) {
 
 func TestShow(t *testing.T) {
 	games := NewGames()
-	games.AddGame("test")
+	path := fmt.Sprintf("/games/%d", games.AddGame("test"))
 
-	req, err := http.NewRequest("GET", "/games/1", nil)
+	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
