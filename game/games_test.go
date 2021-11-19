@@ -23,15 +23,19 @@ func TestFindGame(t *testing.T) {
 
 func TestAddGame(t *testing.T) {
 	games := NewGames()
-	games.AddGame("test")
+  id := games.AddGame("test")
 
 	if len(games.games) != 1 {
 		t.Errorf("Failed to add game")
 	}
 
-	if game := games.games[0]; game.Name != "test" {
+  game := games.games[0]
+	if game.Name != "test" {
 		t.Errorf("Failed to AddGame with correct data")
 	}
+  if game.ID != id {
+    t.Errorf("Failed to set ID for new Game")
+  }
 }
 
 func TestShow(t *testing.T) {

@@ -1,18 +1,14 @@
 package game
 
-var lastId = 0
-
 type Game struct {
 	ID      int
 	Name    string
 	Stories []*Game
 }
 
-func NewGame(n string) Game {
-	lastId++
-
+func NewGame(id int, n string) Game {
 	return Game{
-		ID:   lastId,
+		ID:   id,
 		Name: n,
 	}
 }

@@ -19,8 +19,11 @@ func NewGames() Games {
 	return Games{seq: 0}
 }
 
-func (g *Games) AddGame(name string) {
-	g.games = append(g.games, NewGame(name))
+func (g *Games) AddGame(name string) int {
+  // If we move to a DB, we'll need to yank this
+  g.seq++
+	g.games = append(g.games, NewGame(g.seq, name))
+  return g.seq
 }
 
 func (g Games) findGame(id int) (*Game, error) {
