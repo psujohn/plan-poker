@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type Games struct {
@@ -40,9 +42,10 @@ func (g Games) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Games) Show(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.URL.Path[len("/games/"):], 10, 32)
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 32)
 	if err != nil {
-		fmt.Println("Couldn't parse game ID in show")
+		fmt.Println("Couldn't parse game ID <", vars["id"], "> in show")
 	}
 
 	game, err := g.findGame(int(id))

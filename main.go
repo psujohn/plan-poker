@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"plan-poker/game"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -11,13 +13,13 @@ func main() {
 	games.AddGame("whisqy")
 	games.AddGame("SD")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+	r := mux.NewRouter()
+	r.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Welcome to the home page")
 	})
 
-	mux.HandleFunc("/games", games.Index)
-	mux.HandleFunc("/games/", games.Show)
-	http.ListenAndServe(":4000", mux)
+	r.HandleFunc("/games", games.Index)
+	r.HandleFunc("/games/{id}", games.Show)
 
+	http.ListenAndServe(":4000", r)
 }
