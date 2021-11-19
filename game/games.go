@@ -20,10 +20,10 @@ func NewGames() Games {
 }
 
 func (g *Games) AddGame(name string) int {
-  // If we move to a DB, we'll need to yank this
-  g.seq++
+	// If we move to a DB, we'll need to yank this
+	g.seq++
 	g.games = append(g.games, NewGame(g.seq, name))
-  return g.seq
+	return g.seq
 }
 
 func (g Games) findGame(id int) (*Game, error) {
