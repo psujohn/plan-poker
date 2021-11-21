@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"plan-poker/game"
 
@@ -9,17 +8,27 @@ import (
 )
 
 func main() {
-	games := game.NewGames()
-	games.AddGame("whisqy")
-	games.AddGame("SD")
+	srv, err := newServer()
+	if err != nil {
+		return
+	}
+	srv.games.AddGame("whisqy")
+	srv.games.AddGame("SD")
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page")
-	})
+	http.ListenAndServe(":4000", srv.mux)
+}
 
-	r.HandleFunc("/games", games.Index)
-	r.HandleFunc("/games/{id}", games.Show)
+type server struct {
+	mux   *mux.Router
+	games *game.Games
+}
 
-	http.ListenAndServe(":4000", r)
+func newServer() (*server, error) {
+	g := game.NewGames()
+	srv := &server{
+		mux:   mux.NewRouter(),
+		games: &g,
+	}
+	srv.routes()
+	return srv, nil
 }
