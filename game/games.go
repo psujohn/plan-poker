@@ -23,7 +23,7 @@ func (g *Games) AddGame(name string) {
 	g.games = append(g.games, NewGame(name))
 }
 
-func (g Games) findGame(id int) (*Game, error) {
+func (g *Games) findGame(id int) (*Game, error) {
 	for _, gm := range g.games {
 		if gm.ID == id {
 			return &gm, nil
@@ -32,7 +32,7 @@ func (g Games) findGame(id int) (*Game, error) {
 	return nil, errors.New("Couldn't find game")
 }
 
-func (g Games) Index(w http.ResponseWriter, r *http.Request) {
+func (g *Games) Index(w http.ResponseWriter, r *http.Request) {
 	payload, err := json.Marshal(g.games)
 	if err != nil {
 		fmt.Println("Error marshaling games data")
@@ -41,7 +41,7 @@ func (g Games) Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(payload))
 }
 
-func (g Games) Show(w http.ResponseWriter, r *http.Request) {
+func (g *Games) Show(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.ParseInt(vars["id"], 10, 32)
 	if err != nil {
