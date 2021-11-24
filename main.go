@@ -21,8 +21,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv.games.AddGame("whisqy")
-	srv.games.AddGame("SD")
+	game.AddGame(db, "whisqy")
+	game.AddGame(db, "SD")
 
 	http.ListenAndServe(":4000", srv.mux)
 }

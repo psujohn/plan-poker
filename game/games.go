@@ -1,6 +1,7 @@
 package game
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Games struct {
@@ -19,8 +21,20 @@ func NewGames() Games {
 	return Games{seq: 0}
 }
 
-func (g *Games) AddGame(name string) {
-	g.games = append(g.games, NewGame(name))
+func AddGame(db *sql.DB, name string) (int64, error) {
+	insert := "INSERT INTO games(name) VALUES (?)"
+	stmt, err := db.Prepare(insert)
+	if err != nil {
+		return 0, err
+	}
+
+	result, err := stmt.Exec(name)
+	if err != nil {
+		return 0, err
+	}
+
+	id, _ := result.LastInsertId()
+	return id, nil
 }
 
 func (g *Games) findGame(id int) (*Game, error) {
