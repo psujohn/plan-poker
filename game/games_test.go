@@ -38,7 +38,8 @@ func TestFindGame(t *testing.T) {
 	db := setup(t)
 	defer db.Close()
 
-	id, err := AddGame(db, "test")
+	testGame := NewGame("test")
+	id, err := testGame.Save(db)
 	checkErr(t, err)
 
 	game, err := findGame(db, id)
@@ -49,27 +50,12 @@ func TestFindGame(t *testing.T) {
 	}
 }
 
-func TestAddGame(t *testing.T) {
-	db := setup(t)
-	defer db.Close()
-
-	id, err := AddGame(db, "test")
-	checkErr(t, err)
-
-	row := db.QueryRow("SELECT * FROM games WHERE id = ? LIMIT 1", id)
-
-	var game Game
-	row.Scan(&game.ID, &game.Name)
-	if game.Name != "test" {
-		t.Errorf("Failed to store game with correct data")
-	}
-}
-
 func TestShow(t *testing.T) {
 	db := setup(t)
 	defer db.Close()
 
-	id, err := AddGame(db, "test")
+	testGame := NewGame("test")
+	id, err := testGame.Save(db)
 	checkErr(t, err)
 
 	req := httptest.NewRequest("GET", fmt.Sprintf("/games/%d", id), nil)

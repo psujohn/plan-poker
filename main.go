@@ -21,8 +21,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	game.AddGame(db, "whisqy")
-	game.AddGame(db, "SD")
+	whisqy := game.NewGame("whisqy")
+	whisqy.Save(db)
+	sd := game.NewGame("SD")
+	sd.Save(db)
 
 	http.ListenAndServe(":4000", srv.mux)
 }

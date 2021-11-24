@@ -12,22 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func AddGame(db *sql.DB, name string) (int64, error) {
-	insert := "INSERT INTO games(name) VALUES (?)"
-	stmt, err := db.Prepare(insert)
-	if err != nil {
-		return 0, err
-	}
-
-	result, err := stmt.Exec(name)
-	if err != nil {
-		return 0, err
-	}
-
-	id, _ := result.LastInsertId()
-	return id, nil
-}
-
 func findGame(db *sql.DB, id int64) (*Game, error) {
 	row := db.QueryRow("SELECT * FROM games WHERE id = ? LIMIT 1", id)
 
