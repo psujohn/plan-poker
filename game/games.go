@@ -3,8 +3,8 @@ package game
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -37,13 +37,16 @@ func AddGame(db *sql.DB, name string) (int64, error) {
 	return id, nil
 }
 
-func (g *Games) findGame(id int) (*Game, error) {
-	for _, gm := range g.games {
-		if gm.ID == id {
-			return &gm, nil
-		}
+func findGame(db *sql.DB, id int64) (*Game, error) {
+	row := db.QueryRow("SELECT * FROM games WHERE id = ? LIMIT 1", id)
+
+	var game Game
+	err := row.Scan(&game.ID, &game.Name)
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New("Couldn't find game")
+
+	return &game, nil
 }
 
 func (g *Games) Index(w http.ResponseWriter, r *http.Request) {
@@ -55,22 +58,26 @@ func (g *Games) Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(payload))
 }
 
-func (g *Games) Show(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 32)
-	if err != nil {
-		fmt.Println("Couldn't parse game ID <", vars["id"], "> in show")
+func ShowHandler(db *sql.DB) func(http.ResponseWriter, *http.Request) {
+	f := func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.ParseInt(vars["id"], 10, 32)
+		if err != nil {
+			log.Printf("Couldn't parse game ID <%s> in show\n", vars["id"])
+		}
+
+		game, err := findGame(db, id)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		payload, err := json.Marshal(game)
+		if err != nil {
+			log.Println("Marshal error\n", err.Error())
+		}
+
+		fmt.Fprintf(w, string(payload))
 	}
 
-	game, err := g.findGame(int(id))
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	payload, err := json.Marshal(game)
-	if err != nil {
-		fmt.Println("Error marhaling game data")
-	}
-
-	fmt.Fprintf(w, string(payload))
+	return f
 }

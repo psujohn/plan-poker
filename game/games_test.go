@@ -3,8 +3,9 @@ package game
 import (
 	"database/sql"
 	_ "encoding/json"
-	_ "net/http"
-	_ "net/http/httptest"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -34,6 +35,18 @@ func checkErr(t *testing.T, err error) {
 }
 
 func TestFindGame(t *testing.T) {
+	db := setup(t)
+	defer db.Close()
+
+	id, err := AddGame(db, "test")
+	checkErr(t, err)
+
+	game, err := findGame(db, id)
+	checkErr(t, err)
+
+	if game.Name != "test" && game.ID != id {
+		t.Errorf("Failed to find game")
+	}
 }
 
 func TestAddGame(t *testing.T) {
@@ -43,31 +56,27 @@ func TestAddGame(t *testing.T) {
 	id, err := AddGame(db, "test")
 	checkErr(t, err)
 
-	row, err := db.Query("SELECT * FROM games WHERE id = ? LIMIT 1", id)
-	checkErr(t, err)
-	defer row.Close()
+	row := db.QueryRow("SELECT * FROM games WHERE id = ? LIMIT 1", id)
 
 	var game Game
-	for row.Next() {
-		row.Scan(&game.ID, &game.Name)
-	}
+	row.Scan(&game.ID, &game.Name)
 	if game.Name != "test" {
 		t.Errorf("Failed to store game with correct data")
 	}
 }
 
 func TestShow(t *testing.T) {
-	/*
-	  games := NewGames()
-		games.AddGame("test")
+	db := setup(t)
+	defer db.Close()
 
-		// TODO: This is actually borked. The ID is persistent across tests., track ID for game and set here
-		req := httptest.NewRequest("GET", "/games/1", nil)
-		w := httptest.NewRecorder()
-		games.Show(w, req)
+	id, err := AddGame(db, "test")
+	checkErr(t, err)
 
-		if status := w.Code; status != http.StatusOK {
-			t.Errorf("Wrong status code: got %v expected %v", status, http.StatusOK)
-		}
-	*/
+	req := httptest.NewRequest("GET", fmt.Sprintf("/games/%d", id), nil)
+	w := httptest.NewRecorder()
+	ShowHandler(db)(w, req)
+
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("Wrong status code: got %v expected %v", status, http.StatusOK)
+	}
 }

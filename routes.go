@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"plan-poker/game"
 )
 
 func (s server) routes() {
@@ -11,5 +12,5 @@ func (s server) routes() {
 	})
 
 	s.mux.HandleFunc("/games", s.games.Index)
-	s.mux.HandleFunc("/games/{id}", s.games.Show)
+	s.mux.HandleFunc("/games/{id}", game.ShowHandler(s.db))
 }
