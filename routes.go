@@ -11,6 +11,6 @@ func (s server) routes() {
 		fmt.Fprintf(w, "Welcome to the home page")
 	})
 
-	s.mux.HandleFunc("/games", s.games.Index)
+	s.mux.HandleFunc("/games", game.IndexHandler(s.db))
 	s.mux.HandleFunc("/games/{id}", game.ShowHandler(s.db))
 }

@@ -12,15 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Games struct {
-	games []Game
-	seq   int
-}
-
-func NewGames() Games {
-	return Games{seq: 0}
-}
-
 func AddGame(db *sql.DB, name string) (int64, error) {
 	insert := "INSERT INTO games(name) VALUES (?)"
 	stmt, err := db.Prepare(insert)
@@ -49,13 +40,40 @@ func findGame(db *sql.DB, id int64) (*Game, error) {
 	return &game, nil
 }
 
-func (g *Games) Index(w http.ResponseWriter, r *http.Request) {
-	payload, err := json.Marshal(g.games)
+func allGames(db *sql.DB) ([]Game, error) {
+	rows, err := db.Query("SELECT * FROM games")
 	if err != nil {
-		fmt.Println("Error marshaling games data")
+		log.Printf("Failed to retrieve rows:\n %v\n", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var games []Game
+	for rows.Next() {
+		var game Game
+		rows.Scan(&game.ID, &game.Name)
+		games = append(games, game)
 	}
 
-	fmt.Fprintf(w, string(payload))
+	return games, nil
+}
+
+func IndexHandler(db *sql.DB) func(http.ResponseWriter, *http.Request) {
+	f := func(w http.ResponseWriter, r *http.Request) {
+		games, err := allGames(db)
+		if err != nil {
+			log.Println(err)
+		}
+
+		payload, err := json.Marshal(games)
+		if err != nil {
+			log.Printf("Error mashaling games data:\n %v\n", err)
+		}
+
+		fmt.Fprintf(w, string(payload))
+	}
+
+	return f
 }
 
 func ShowHandler(db *sql.DB) func(http.ResponseWriter, *http.Request) {

@@ -28,17 +28,14 @@ func main() {
 }
 
 type server struct {
-	db    *sql.DB
-	mux   *mux.Router
-	games *game.Games
+	db  *sql.DB
+	mux *mux.Router
 }
 
 func newServer(db *sql.DB) (*server, error) {
-	g := game.NewGames()
 	srv := &server{
-		db:    db,
-		mux:   mux.NewRouter(),
-		games: &g,
+		db:  db,
+		mux: mux.NewRouter(),
 	}
 	srv.routes()
 	return srv, nil
