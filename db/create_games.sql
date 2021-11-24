@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS games (
+  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" text NOT NULL
+);
