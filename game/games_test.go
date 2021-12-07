@@ -3,9 +3,6 @@ package game
 import (
 	"database/sql"
 	_ "encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -51,7 +48,7 @@ func TestSave(t *testing.T) {
 	}
 }
 
-func TestFindGame(t *testing.T) {
+func TestFind(t *testing.T) {
 	db := setup(t)
 	defer db.Close()
 
@@ -59,27 +56,10 @@ func TestFindGame(t *testing.T) {
 	id, err := testGame.Save(db)
 	checkErr(t, err)
 
-	game, err := findGame(db, id)
+	game, err := Find(db, id)
 	checkErr(t, err)
 
 	if game.Name != "test" && game.ID != id {
 		t.Errorf("Failed to find game")
-	}
-}
-
-func TestShow(t *testing.T) {
-	db := setup(t)
-	defer db.Close()
-
-	testGame := NewGame("test")
-	id, err := testGame.Save(db)
-	checkErr(t, err)
-
-	req := httptest.NewRequest("GET", fmt.Sprintf("/games/%d", id), nil)
-	w := httptest.NewRecorder()
-	ShowHandler(db)(w, req)
-
-	if status := w.Code; status != http.StatusOK {
-		t.Errorf("Wrong status code: got %v expected %v", status, http.StatusOK)
 	}
 }
