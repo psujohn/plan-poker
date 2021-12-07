@@ -69,7 +69,7 @@ func All(db *sql.DB) ([]*Game, error) {
 	var games []*Game
 	for rows.Next() {
 		var game Game
-		rows.Scan(game.ID, &game.Name)
+		rows.Scan(&game.ID, &game.Name)
 		games = append(games, &game)
 	}
 
