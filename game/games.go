@@ -1,62 +1,77 @@
 package game
 
 import (
+	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"strconv"
+	"log"
 
-	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-type Games struct {
-	games []Game
-	seq   int
+type Game struct {
+	ID      int64
+	Name    string
+	Stories []*Game
 }
 
-func NewGames() Games {
-	return Games{seq: 0}
-}
-
-func (g *Games) AddGame(name string) {
-	g.games = append(g.games, NewGame(name))
-}
-
-func (g *Games) findGame(id int) (*Game, error) {
-	for _, gm := range g.games {
-		if gm.ID == id {
-			return &gm, nil
-		}
+func NewGame(n string) Game {
+	return Game{
+		Name: n,
 	}
-	return nil, errors.New("Couldn't find game")
 }
 
-func (g *Games) Index(w http.ResponseWriter, r *http.Request) {
-	payload, err := json.Marshal(g.games)
+func (g *Game) Json() ([]byte, error) {
+	data, err := json.Marshal(g)
 	if err != nil {
-		fmt.Println("Error marshaling games data")
+		return nil, err
 	}
 
-	fmt.Fprintf(w, string(payload))
+	return data, nil
 }
 
-func (g *Games) Show(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 32)
+func (g *Game) Save(db *sql.DB) (int64, error) {
+	insert := "INSERT INTO games(name) VALUES (?)"
+	stmt, err := db.Prepare(insert)
 	if err != nil {
-		fmt.Println("Couldn't parse game ID <", vars["id"], "> in show")
+		return 0, err
 	}
 
-	game, err := g.findGame(int(id))
+	result, err := stmt.Exec(g.Name)
 	if err != nil {
-		fmt.Println(err.Error())
+		return 0, err
 	}
 
-	payload, err := json.Marshal(game)
+	id, _ := result.LastInsertId()
+	g.ID = id
+	return id, nil
+}
+
+func Find(db *sql.DB, id int64) (*Game, error) {
+	row := db.QueryRow("SELECT * FROM games WHERE id = ? LIMIT 1", id)
+
+	var game Game
+	err := row.Scan(&game.ID, &game.Name)
 	if err != nil {
-		fmt.Println("Error marhaling game data")
+		return nil, err
 	}
 
-	fmt.Fprintf(w, string(payload))
+	return &game, nil
+}
+
+func All(db *sql.DB) ([]*Game, error) {
+	rows, err := db.Query("SELECT * FROM games")
+	if err != nil {
+		log.Printf("Failed to retrieve rows:\n %v\n", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var games []*Game
+	for rows.Next() {
+		var game Game
+		rows.Scan(&game.ID, &game.Name)
+		games = append(games, &game)
+	}
+
+	return games, nil
 }

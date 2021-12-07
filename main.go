@@ -1,33 +1,43 @@
 package main
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 	"plan-poker/game"
 
 	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	srv, err := newServer()
+	db, err := sql.Open("sqlite3", "./planning-poker.db")
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
-	srv.games.AddGame("whisqy")
-	srv.games.AddGame("SD")
+	defer db.Close()
+
+	srv, err := newServer(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+	whisqy := game.NewGame("whisqy")
+	whisqy.Save(db)
+	sd := game.NewGame("SD")
+	sd.Save(db)
 
 	http.ListenAndServe(":4000", srv.mux)
 }
 
 type server struct {
-	mux   *mux.Router
-	games *game.Games
+	db  *sql.DB
+	mux *mux.Router
 }
 
-func newServer() (*server, error) {
-	g := game.NewGames()
+func newServer(db *sql.DB) (*server, error) {
 	srv := &server{
-		mux:   mux.NewRouter(),
-		games: &g,
+		db:  db,
+		mux: mux.NewRouter(),
 	}
 	srv.routes()
 	return srv, nil
