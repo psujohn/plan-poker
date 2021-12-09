@@ -21,9 +21,6 @@ func main() {
 	if err != nil {
 		return
 	}
-	srv.games.AddGame("whisqy")
-	srv.games.AddGame("SD")
-
 	http.ListenAndServe(":4000", srv.mux)
 }
 
@@ -34,7 +31,7 @@ type server struct {
 }
 
 func newServer(db *sql.DB) (*server, error) {
-	g := game.NewGames()
+	g := game.NewGames(db)
 	srv := &server{
 		db:    db,
 		mux:   mux.NewRouter(),

@@ -8,7 +8,7 @@ import (
 )
 
 func TestFindGame(t *testing.T) {
-	games := NewGames()
+	games := NewGames(nil)
 	games.AddGame("test")
 
 	game, err := games.findGame(1)
@@ -22,7 +22,7 @@ func TestFindGame(t *testing.T) {
 }
 
 func TestAddGame(t *testing.T) {
-	games := NewGames()
+	games := NewGames(nil)
 	games.AddGame("test")
 
 	if len(games.games) != 1 {
@@ -35,7 +35,7 @@ func TestAddGame(t *testing.T) {
 }
 
 func TestShow(t *testing.T) {
-	games := NewGames()
+	games := NewGames(nil)
 	games.AddGame("test")
 
 	// TODO: This is actually borked. The ID is persistent across tests., track ID for game and set here
