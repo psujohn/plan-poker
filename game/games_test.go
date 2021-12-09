@@ -50,6 +50,25 @@ func dbSetup(t *testing.T) *sql.DB {
   return db
 }
 
+func TestAll(t *testing.T) {
+  db := dbSetup(t)
+
+  games, err := All(db)
+  if err != nil {
+    t.Fatal(err)
+  }
+
+  if count := len(games); count < 1 {
+    t.Errorf("Unexpected games count: expected %d got %v", 2, count)
+  }
+
+  if name := games[0].Name; name != "sd" {
+    t.Errorf("Game not found: expected 'sd'")
+  }
+
+}
+
+
 func TestFindGame(t *testing.T) {
 	games := NewGames(nil)
 	games.AddGame("test")
