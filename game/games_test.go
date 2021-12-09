@@ -52,6 +52,7 @@ func dbSetup(t *testing.T) *sql.DB {
 
 func TestAll(t *testing.T) {
 	db := dbSetup(t)
+  defer db.Close()
 
 	games, err := All(db)
 	if err != nil {
