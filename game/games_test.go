@@ -1,73 +1,72 @@
 package game
 
 import (
-  "database/sql"
+	"database/sql"
 	_ "encoding/json"
 	"net/http"
 	"net/http/httptest"
-  "os"
+	"os"
 	"testing"
 
-  _ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func checkErr(t *testing.T, err error) {
-  if err != nil {
-    t.Fatal(err)
-  }
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func prepareFromFile(db *sql.DB, path string) (*sql.Stmt, error) {
-  data, err := os.ReadFile(path)
-  if err != nil {
-    return nil, err
-  }
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
 
-  stmt, err := db.Prepare(string(data))
-  if err != nil {
-    return nil, err
-  }
+	stmt, err := db.Prepare(string(data))
+	if err != nil {
+		return nil, err
+	}
 
-  return stmt, nil
+	return stmt, nil
 }
 
 func dbSetup(t *testing.T) *sql.DB {
-  db, err := sql.Open("sqlite3", ":memory:")
-  checkErr(t, err)
+	db, err := sql.Open("sqlite3", ":memory:")
+	checkErr(t, err)
 
-  stmt, err := prepareFromFile(db, "../db/create_games.sql")
-  checkErr(t, err)
+	stmt, err := prepareFromFile(db, "../db/create_games.sql")
+	checkErr(t, err)
 
-  _, err = stmt.Exec()
-  checkErr(t, err)
+	_, err = stmt.Exec()
+	checkErr(t, err)
 
-  stmt, err = prepareFromFile(db, "../db/seed_games.sql")
-  checkErr(t, err)
+	stmt, err = prepareFromFile(db, "../db/seed_games.sql")
+	checkErr(t, err)
 
-  _, err = stmt.Exec()
-  checkErr(t, err)
+	_, err = stmt.Exec()
+	checkErr(t, err)
 
-  return db
+	return db
 }
 
 func TestAll(t *testing.T) {
-  db := dbSetup(t)
+	db := dbSetup(t)
 
-  games, err := All(db)
-  if err != nil {
-    t.Fatal(err)
-  }
+	games, err := All(db)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-  if count := len(games); count < 1 {
-    t.Errorf("Unexpected games count: expected %d got %v", 2, count)
-  }
+	if count := len(games); count < 1 {
+		t.Errorf("Unexpected games count: expected %d got %v", 2, count)
+	}
 
-  if name := games[0].Name; name != "sd" {
-    t.Errorf("Game not found: expected 'sd'")
-  }
+	if name := games[0].Name; name != "sd" {
+		t.Errorf("Game not found: expected 'sd'")
+	}
 
 }
-
 
 func TestFindGame(t *testing.T) {
 	games := NewGames(nil)
