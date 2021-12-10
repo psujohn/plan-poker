@@ -31,30 +31,29 @@ func prepareFromFile(db *sql.DB, path string) (*sql.Stmt, error) {
 	return stmt, nil
 }
 
+func executeFiles(db *sql.DB, paths ...string) error {
+  for _, path := range paths {
+    stmt, err := prepareFromFile(db, path)
+    if err != nil {
+      return err
+    }
+
+    _, err = stmt.Exec()
+    stmt.Close()
+    if err != nil {
+      return err
+    }
+  }
+
+  return nil
+}
+
 func dbSetup(t *testing.T) *sql.DB {
 	db, err := sql.Open("sqlite3", ":memory:")
 	checkErr(t, err)
 
-	stmt, err := prepareFromFile(db, "../db/create_games.sql")
-	checkErr(t, err)
-
-	_, err = stmt.Exec()
-	stmt.Close()
-	checkErr(t, err)
-
-	stmt, err = prepareFromFile(db, "../db/seed_games_sd.sql")
-	checkErr(t, err)
-
-	_, err = stmt.Exec()
-	stmt.Close()
-	checkErr(t, err)
-
-	stmt, err = prepareFromFile(db, "../db/seed_games_whisqy.sql")
-	checkErr(t, err)
-
-	_, err = stmt.Exec()
-	stmt.Close()
-	checkErr(t, err)
+  err = executeFiles(db, "../db/create_games.sql", "../db/seed_games_sd.sql", "../db/seed_games_whisqy.sql")
+  checkErr(t, err)
 
 	return db
 }
