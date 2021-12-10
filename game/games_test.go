@@ -71,9 +71,9 @@ func TestAll(t *testing.T) {
 		t.Errorf("Unexpected games count: expected %d got %v", 2, count)
 	}
 
-	names := make(map[string]int)
+	names := make(map[string]struct{})
 	for _, game := range games {
-		names[game.Name] = 1
+		names[game.Name] = struct{}{}
 	}
 
 	if _, found := names["sd"]; !found {
