@@ -10,5 +10,6 @@ sqlite3 planning-poker.db < db/create_games.sql
 Seed the database:
 
 ```
-sqlite3 planning-poker.db < db/seed_games.sql
+sqlite3 planning-poker.db < db/seed_games_sd.sql
+sqlite3 planning-poker.db < db/seed_games_whisqy.sql
 ```

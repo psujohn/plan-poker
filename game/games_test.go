@@ -39,12 +39,21 @@ func dbSetup(t *testing.T) *sql.DB {
 	checkErr(t, err)
 
 	_, err = stmt.Exec()
+	stmt.Close()
 	checkErr(t, err)
 
-	stmt, err = prepareFromFile(db, "../db/seed_games.sql")
+	stmt, err = prepareFromFile(db, "../db/seed_games_sd.sql")
 	checkErr(t, err)
 
 	_, err = stmt.Exec()
+	stmt.Close()
+	checkErr(t, err)
+
+	stmt, err = prepareFromFile(db, "../db/seed_games_whisqy.sql")
+	checkErr(t, err)
+
+	_, err = stmt.Exec()
+	stmt.Close()
 	checkErr(t, err)
 
 	return db
@@ -52,21 +61,29 @@ func dbSetup(t *testing.T) *sql.DB {
 
 func TestAll(t *testing.T) {
 	db := dbSetup(t)
-  defer db.Close()
+	defer db.Close()
 
 	games, err := All(db)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if count := len(games); count < 1 {
+	if count := len(games); count < 2 {
 		t.Errorf("Unexpected games count: expected %d got %v", 2, count)
 	}
 
-	if name := games[0].Name; name != "sd" {
+	names := make(map[string]int)
+	for _, game := range games {
+		names[game.Name] = 1
+	}
+
+	if _, found := names["sd"]; !found {
 		t.Errorf("Game not found: expected 'sd'")
 	}
 
+	if _, found := names["whisqy"]; !found {
+		t.Errorf("Game not found: expected 'whisqy'")
+	}
 }
 
 func TestFindGame(t *testing.T) {
