@@ -8,10 +8,10 @@ type Game struct {
 	Stories []*Game
 }
 
-func NewGame(n string) Game {
+func NewGame(n string) *Game {
 	lastId++
 
-	return Game{
+	return &Game{
 		ID:   lastId,
 		Name: n,
 	}
